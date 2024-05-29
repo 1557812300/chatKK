@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI集合</title>
+    <!-- Import Element Plus style from unpkg -->
+    <link rel="stylesheet" href="./utils/element-plus/index.css" />
+    <!-- Import Vue 3 from unpkg -->
+    <script src="./utils/vue.global.js"></script>
+    <!-- Import Element Plus component library from unpkg -->
+    <script src="./utils/element-plus/index.js"></script>
+    <script src="./utils/element-plus/icons-vue.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        #app {
+            height: 100vh;
+            display: flex;
+        }
+        .sidebar {
+            height: 100%;
+            transition: width 0.3s;
+            position: relative;
+        }
+        .hidden {
+            width: 0;
+            overflow: hidden;
+        }
+        .shown {
+            width: 200px;
+        }
+        .menu-content {
+            height: 100%;
+            width: 200px;
+            overflow: hidden;
+        }
+        iframe {
+            flex-grow: 1;
+            border: none;
+            height: 100%;
+            width: 100%;
+            display: none;
+        }
+        .iframe-visible {
+            display: block;
+        }
+        .toggle-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1;
+        }
+        .el-menu-item {
+            height: 56px;
+            line-height: 56px;
+        }
+        .title {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        /* 确保按钮在侧边栏隐藏时可见 */
+        .sidebar .toggle-button {
+            left: 10px;
+        }
+        .toggle-button-fixed {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        .el-dropdown {
+            font-size: 17px;
+            font-weight: 900;
+            color: gray;
+            line-height: 30px;
+        }
+        .header-title {
+            flex-grow: 1;
+            margin-left: 60px; /* 调整标题位置 */
+            font-size: 50px;
+            font-weight: 500;
+            color: gray;
+            line-height: 30px;
+        }
+        .shensuo-btn {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div :class="['sidebar', isCollapsed ? 'hidden' : 'shown']">
+            <div v-if="!isCollapsed" class="menu-content">
+                <div class="title">AI探索</div>
+                <el-menu
+                    :default-active="activeName"
+                    class="el-menu-vertical-demo"
+                    @select="handleSelect"
+                    style="height: calc(100% - 64px);"
+                >
+                    <el-menu-item
+                        v-for="(iframe, index) in iframes"
+                        :key="index"
+                        :index="iframe.src"
+                    >
+                        {{ iframe.title }}
+                    </el-menu-item>
+                </el-menu>
+            </div>
+        </div>
+        <div style="flex-grow: 1; position: relative;">
+            <div class="header">
+                <div class="toggle-button" v-if="!isCollapsed">
+                    <el-button @click="toggleSidebar" plain class="shensuo-btn">
+                        <i><</i>
+                    </el-button>
+                </div>
+                <div class="header-title">
+                    <el-dropdown @command="handleCommand">
+                        <span class="el-dropdown-link">
+                            {{ currentTitle }}
+                            <el-icon class="el-icon--right">
+                                <arrow-down />
+                            </el-icon>
+                        </span>
+                        <template #dropdown>
+                            <el-dropdown-menu>
+                                <el-dropdown-item
+                                    v-for="(item, index) in dropdownItems"
+                                    :key="index"
+                                    :command="item.src"
+                                >
+                                    {{ item.title }}
+                                </el-dropdown-item>
+                            </el-dropdown-menu>
+                        </template>
+                    </el-dropdown>
+                </div>
+                <el-button @click="newWindow" plain>新建</el-button>
+            </div>
+            <iframe
+                v-for="iframe in iframes"
+                :key="iframe.src"
+                :src="iframe.src"
+                :class="{'iframe-visible': iframe.src === activeName}"
+            ></iframe>
+        </div>
+        <div class="toggle-button-fixed" v-if="isCollapsed">
+            <el-button @click="toggleSidebar" plain>
+                <i>></i>
+            </el-button>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue;
+
+        const App = {
+            setup() {
+                const isCollapsed = ref(false);
+                const activeName = ref('./page/chatGPT3-5.html');
+                const currentTitle = ref('ChatGPT-3.5');
+
+                const iframes = ref([
+                    { src: './page/chatGPT3-5.html', title: 'ChatGPT-3.5' }
+                ]);
+
+                const dropdownItems = ref([
+                    { src: './page/chatGPT3-5.html', title: 'ChatGPT-3.5' },
+                    { src: './page/chatGPT4.html', title: 'ChatGPT-4' },
+                    { src: './page/chatGPT4-trubo.html', title: 'ChatGPT-4 Turbo' },
+                    { src: './page/chatGPT4o.html', title: 'ChatGPT-4o' },
+                    { src: './page/gemini1-5flash.html', title: 'Gemini 1.5 Flash' },
+                    { src: './page/gemini1-5pro.html', title: 'Gemini 1.5 Pro' },
+                    { src: './page/qianduan.html', title: '前端助手' }
+                ]);
+
+                const handleSelect = (key) => {
+                    activeName.value = key;
+                    const selectedIframe = iframes.value.find(iframe => iframe.src === key);
+                    if (selectedIframe) {
+                        currentTitle.value = selectedIframe.title;
+                    }
+                };
+
+                const handleCommand = (command) => {
+                    activeName.value = command;
+                    const selectedIframe = iframes.value.find(iframe => iframe.src === command);
+                    if (selectedIframe) {
+                        currentTitle.value = selectedIframe.title;
+                    } else {
+                        const newIframe = dropdownItems.value.find(item => item.src === command);
+                        if (newIframe) {
+                            iframes.value.push(newIframe);
+                            currentTitle.value = newIframe.title;
+                        }
+                    }
+                };
+
+                const toggleSidebar = () => {
+                    isCollapsed.value = !isCollapsed.value;
+                };
+
+                const newWindow = () => {
+                    const currentIframe = iframes.value.find(iframe => iframe.src === activeName.value);
+                    if (currentIframe) {
+                        const newIframe = { ...currentIframe, src: `${currentIframe.src}?new=${Date.now()}` };
+                        iframes.value.push(newIframe);
+                        activeName.value = newIframe.src;
+                    }
+                };
+
+                return {
+                    isCollapsed,
+                    activeName,
+                    currentTitle,
+                    iframes,
+                    dropdownItems,
+                    handleSelect,
+                    handleCommand,
+                    toggleSidebar,
+                    newWindow
+                };
+            }
+        };
+
+        const app = createApp(App);
+        app.use(ElementPlus);
+        app.mount('#app');
+    </script>
+</body>
+</html>

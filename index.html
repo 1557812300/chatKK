@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to AI Wonderland</title>
+    <style>
+        body { 
+          margin: 0; 
+          overflow: hidden; 
+        }
+        #welcome-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1;
+        }
+        h1 {
+            font-size: 3em;
+            color: white;
+        }
+        p {
+            color: white;
+            font-size: 1.4em;
+        }
+        .continue-btn {
+            padding: 0.6em 1.2em;
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .continue-btn:focus {
+            outline: none;
+        }
+        .continue-btn:hover {
+            background-color: #0056b3;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="welcome-container">
+        <h1>欢迎探索AI世界</h1>
+        <p>探索充满活力的新领域.</p>
+        <button class="continue-btn" onclick="window.location.href='content.html'">
+          下一页 »
+        </button>
+    </div>
+    
+    <!-- Link to the Three.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
+    <script>
+        let scene, camera, renderer, particles;
+        const particleCount = 2000;
+
+        function init() {
+            scene = new THREE.Scene();
+            
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+
+            for (let i = 0; i < particleCount; i++) {
+                const x = THREE.MathUtils.randFloatSpread(2000);
+                const y = THREE.MathUtils.randFloatSpread(2000);
+                const z = THREE.MathUtils.randFloatSpread(2000);
+                vertices.push(x, y, z);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+            const material = new THREE.PointsMaterial({ color: 0x888888 });
+            particles = new THREE.Points(geometry, material);
+
+            scene.add(particles);
+
+            window.addEventListener('resize', onResize, false);
+            animate();
+        }
+
+        function onResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            particles.rotation.x += 0.0005;
+            particles.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+
+        init();
+    </script>
+</body>
+</html>
