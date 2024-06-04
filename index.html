@@ -51,9 +51,9 @@
             display: block;
         }
         .toggle-button {
-            position: absolute;
+            /* position: absolute;
             top: 10px;
-            left: 10px;
+            left: 10px; */
             z-index: 1;
         }
         .el-menu-item {
@@ -62,7 +62,9 @@
         }
         .title {
             text-align: center;
-            padding: 20px 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
         }
 
         /* 确保按钮在侧边栏隐藏时可见 */
@@ -78,6 +80,7 @@
         .header {
             display: flex;
             align-items: center;
+            justify-content: space-around;
             padding: 10px;
             background-color: #f5f5f5;
             border-bottom: 1px solid #ddd;
@@ -90,7 +93,7 @@
         }
         .header-title {
             flex-grow: 1;
-            margin-left: 60px; /* 调整标题位置 */
+            margin-left: 6px; /* 调整标题位置 */
             font-size: 50px;
             font-weight: 500;
             color: gray;
@@ -105,7 +108,16 @@
     <div id="app">
         <div :class="['sidebar', isCollapsed ? 'hidden' : 'shown']">
             <div v-if="!isCollapsed" class="menu-content">
-                <div class="title">AI探索</div>
+                <div class="title">
+                    <div class="toggle-button" >
+                        <el-button @click="toggleSidebar" v-if="!isCollapsed" plain class="shensuo-btn">
+                            <i><</i>
+                        </el-button>
+                    </div>
+                    <div class="toggle-button" >
+                        <el-button @click="newWindow" plain>新建</el-button>
+                    </div>
+                </div>
                 <el-menu
                     :default-active="activeName"
                     class="el-menu-vertical-demo"
@@ -124,11 +136,9 @@
         </div>
         <div style="flex-grow: 1; position: relative;">
             <div class="header">
-                <div class="toggle-button" v-if="!isCollapsed">
-                    <el-button @click="toggleSidebar" plain class="shensuo-btn">
-                        <i><</i>
-                    </el-button>
-                </div>
+                <el-button @click="toggleSidebar" v-if="isCollapsed" plain class="shensuo-btn">
+                    <i>></i>
+                </el-button>
                 <div class="header-title">
                     <el-dropdown @command="handleCommand">
                         <span class="el-dropdown-link">
@@ -150,7 +160,6 @@
                         </template>
                     </el-dropdown>
                 </div>
-                <el-button @click="newWindow" plain>新建</el-button>
             </div>
             <iframe
                 v-for="iframe in iframes"
@@ -159,15 +168,12 @@
                 :class="{'iframe-visible': iframe.src === activeName}"
             ></iframe>
         </div>
-        <div class="toggle-button-fixed" v-if="isCollapsed">
-            <el-button @click="toggleSidebar" plain>
-                <i>></i>
-            </el-button>
-        </div>
     </div>
 
     <script>
         const { createApp, ref } = Vue;
+        const { ElButton, ElMenu, ElMenuItem, ElDropdown, ElDropdownMenu, ElDropdownItem, ElIcon } = ElementPlus;
+        const { ArrowDown } = ElementPlusIconsVue;
 
         const App = {
             setup() {
@@ -235,6 +241,16 @@
                     toggleSidebar,
                     newWindow
                 };
+            },
+            components: {
+                ElButton,
+                ElMenu,
+                ElMenuItem,
+                ElDropdown,
+                ElDropdownMenu,
+                ElDropdownItem,
+                ElIcon,
+                ArrowDown
             }
         };
 
